@@ -20,7 +20,7 @@ const PlannerLayout = ({ activeTab, setActiveTab, children, onAddEvent, onSearch
   };
 
   return (
-    <div className="h-screen w-screen bg-transparent flex flex-col font-sans relative overflow-hidden p-1">
+    <div className="h-screen w-screen bg-transparent flex flex-col font-sans relative overflow-hidden p-1 dark:text-gray-100">
       
       {/* Bordes de redimensión (Invisibles) */}
       <div className="fixed top-0 left-0 right-0 h-1 z-[9999] cursor-n-resize bg-transparent" style={{ WebkitAppRegion: 'no-drag' }}></div>
@@ -46,7 +46,7 @@ const PlannerLayout = ({ activeTab, setActiveTab, children, onAddEvent, onSearch
         </div>
 
         {/* PÁGINA PRINCIPAL */}
-        <div className="flex-1 bg-white relative shadow-inner flex flex-col -ml-[1px] rounded-r-xl overflow-hidden">
+        <div className="flex-1 bg-white dark:bg-slate-900 relative shadow-inner flex flex-col -ml-[1px] rounded-r-xl overflow-hidden">
             
             {/* 1. FRANJA DE ARRASTRE SUPERIOR (6px) 
                Solo sirve para arrastrar. Está pegada al borde superior.
@@ -91,8 +91,8 @@ const PlannerLayout = ({ activeTab, setActiveTab, children, onAddEvent, onSearch
             ))}
 
             <div className="mt-auto pb-4 flex flex-col gap-3 pl-1">
-                 <button onClick={onSettingsClick} className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 hover:bg-white hover:text-blue-500 transition shadow"><Settings size={18} /></button>
-                 <button onClick={onSearchClick} className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 hover:bg-white hover:text-blue-500 transition shadow"><Search size={18} /></button>
+                 <button onClick={onSettingsClick} className="w-10 h-10 bg-gray-100 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center text-gray-500 hover:bg-white hover:text-blue-500 transition shadow"><Settings size={18} /></button>
+                 <button onClick={onSearchClick} className="w-10 h-10 bg-gray-100 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center text-gray-500 hover:bg-white hover:text-blue-500 transition shadow"><Search size={18} /></button>
                  <button onClick={onAddEvent} className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white hover:bg-blue-500 transition shadow-lg mt-2 transform hover:scale-110 active:scale-95"><Plus size={22} /></button>
             </div>
         </div>

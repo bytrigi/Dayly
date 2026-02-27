@@ -6,14 +6,17 @@ import { es } from 'date-fns/locale';
 const MAX_VISIBLE_EVENTS = 4; 
 const ROW_HEIGHT_CLASS = 'h-15'; // Altura fija de la celda
 
-const MonthView = ({ date, onDayClick, onEventClick, events = [] }) => {
+const MonthView = ({ date, onDayClick, onEventClick, events = [], startOfWeek: weekStartsOn = 1 }) => {
     const monthStart = startOfMonth(date);
     const monthEnd = endOfMonth(date);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn });
 
-    const weeks = eachWeekOfInterval({ start: calendarStart, end: calendarEnd }, { weekStartsOn: 1 });
-    const weekDaysNames = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+    const weeks = eachWeekOfInterval({ start: calendarStart, end: calendarEnd }, { weekStartsOn });
+    
+    const weekDaysNames = weekStartsOn === 1 
+        ? ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom']
+        : ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 
     // Helper para transparencia
     const hexToRgba = (hex, alpha) => {
@@ -43,22 +46,22 @@ const MonthView = ({ date, onDayClick, onEventClick, events = [] }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-white/60 p-4 overflow-hidden font-sans">
-             <h2 className="text-3xl font-serif font-bold text-gray-800 mb-4 capitalize pl-2">
+        <div className="flex flex-col h-full bg-white/60 dark:bg-slate-900 p-4 overflow-hidden font-sans">
+             <h2 className="text-3xl font-serif font-bold text-gray-800 dark:text-gray-100 mb-4 capitalize pl-2">
                 {format(date, 'MMMM yyyy', { locale: es })}
             </h2>
 
             {/* Header Días */}
-            <div className="grid grid-cols-7 mb-2 border-b border-gray-200 pb-2">
+            <div className="grid grid-cols-7 mb-2 border-b border-gray-200 dark:border-slate-800 pb-2">
                 {weekDaysNames.map(d => (
-                    <div key={d} className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest">{d}</div>
+                    <div key={d} className="text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{d}</div>
                 ))}
             </div>
 
             {/* Grid de Semanas */}
             <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar gap-1">
                 {weeks.map((weekStart, weekIdx) => {
-                    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+                    const weekEnd = endOfWeek(weekStart, { weekStartsOn });
                     const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
                     // LOGICA DE SLOTS (Row Index)
@@ -133,12 +136,12 @@ const MonthView = ({ date, onDayClick, onEventClick, events = [] }) => {
                                             key={dayIdx}
                                             onClick={() => onDayClick && onDayClick(dayItem)}
                                             className={`
-                                                border border-gray-200/60 rounded-lg p-1 relative flex flex-col cursor-pointer transition-all
-                                                ${!isCurrentMonth ? 'bg-gray-50/50 text-gray-300' : 'bg-white hover:border-blue-400 hover:shadow-md'}
+                                                border border-gray-200/60 dark:border-slate-800/60 rounded-lg p-1 relative flex flex-col cursor-pointer transition-all
+                                                ${!isCurrentMonth ? 'bg-gray-50/50 dark:bg-slate-800/30 text-gray-300 dark:text-gray-600' : 'bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md'}
                                             `}
                                         >
                                              <div className="flex justify-between items-start">
-                                                <span className={`text-xs font-semibold ml-1 mt-1 ${isToday ? 'text-white bg-red-500 w-5 h-5 rounded-full flex items-center justify-center shadow-sm' : ''}`}>
+                                                <span className={`text-xs font-semibold ml-1 mt-1 ${isToday ? 'text-white bg-red-500 w-5 h-5 rounded-full flex items-center justify-center shadow-sm' : 'dark:text-gray-200'}`}>
                                                     {format(dayItem, 'd')}
                                                 </span>
                                                 {/* Indicador Overflow */}

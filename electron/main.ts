@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain, screen } from 'electron'
-import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -19,7 +18,7 @@ let win: BrowserWindow | null
 app.disableHardwareAcceleration() 
 
 if (process.platform === 'win32') {
-  app.setAppUserModelId('Planner App')
+  app.setAppUserModelId('com.ioscalendar.windows')
 }
 
 function createWindow() {
@@ -31,6 +30,7 @@ function createWindow() {
     transparent: true, 
     backgroundColor: '#00000000',
     autoHideMenuBar: true,
+    icon: path.join(process.env.VITE_PUBLIC, 'logo.png'),
     webPreferences: {
       preload: path.join(process.env.APP_ROOT, 'dist-electron', 'preload.mjs'),
       sandbox: false,

@@ -180,23 +180,23 @@ const DayView = ({ date, events, onEventClick }) => {
         <div className="flex h-full relative">
             
             {/* --- ZONA CALENDARIO --- */}
-            <div className="flex-1 flex flex-col h-full bg-white relative transition-all duration-300">
+            <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-900 relative transition-all duration-300">
                 
                 {/* Cabecera */}
-                <div className="p-6 border-b border-gray-100 flex justify-between items-end bg-white z-10 sticky top-0 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
+                <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-end bg-white dark:bg-slate-900 z-10 sticky top-0 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
                     <div>
                         {/* FECHA: Rojo si es hoy, Negro si no */}
-                        <h2 className={`text-5xl font-serif font-bold capitalize leading-none ${isToday ? 'text-red-500' : 'text-gray-800'}`}>
+                        <h2 className={`text-5xl font-serif font-bold capitalize leading-none ${isToday ? 'text-red-500' : 'text-gray-800 dark:text-gray-100'}`}>
                             {format(date, 'EEEE', { locale: es })}
                         </h2>
-                        <p className={`text-xl mt-1 font-light ${isToday ? 'text-red-400' : 'text-gray-400'}`}>
+                        <p className={`text-xl mt-1 font-light ${isToday ? 'text-red-400' : 'text-gray-400 dark:text-gray-500'}`}>
                             {format(date, 'd MMMM yyyy', { locale: es })}
                         </p>
                     </div>
                     
                     <div className="flex items-end gap-6">
                         <div className="text-right">
-                            <span className="text-4xl font-bold text-gray-800 block leading-none">
+                            <span className="text-4xl font-bold text-gray-800 dark:text-gray-100 block leading-none">
                                 {dayEvents.length + allDayEvents.length}
                             </span>
                             <span className="text-xs text-gray-400 uppercase tracking-widest font-bold">Eventos</span>
@@ -204,7 +204,7 @@ const DayView = ({ date, events, onEventClick }) => {
 
                         <button 
                             onClick={() => setShowTasks(!showTasks)}
-                            className={`p-2 rounded-xl transition-all ${showTasks ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                            className={`p-2 rounded-xl transition-all ${showTasks ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
                         >
                             <ListTodo size={24} />
                         </button>
@@ -212,7 +212,7 @@ const DayView = ({ date, events, onEventClick }) => {
                 </div>
 
                 {allDayEvents.length > 0 && (
-                    <div className="px-14 py-2 border-b border-gray-100 bg-gray-50/30 flex flex-wrap gap-2 z-10 relative flex-shrink-0">
+                    <div className="px-14 py-2 border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-800/30 flex flex-wrap gap-2 z-10 relative flex-shrink-0">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest self-center mr-2">Todo el día</span>
                         {allDayEvents.map(event => (
                             <button
@@ -227,15 +227,14 @@ const DayView = ({ date, events, onEventClick }) => {
                     </div>
                 )}
 
-                {/* Grid Horas */}
                 <div ref={scrollRef} className="flex-1 overflow-y-auto relative no-scrollbar">
                     {hours.map(hour => (
-                        <div key={hour} className="group flex h-[80px] border-b border-gray-50 relative">
-                            <div className="w-[60px] text-right pr-4 py-2 text-xs font-bold text-gray-300 group-hover:text-blue-400 transition-colors select-none">
+                        <div key={hour} className="group flex h-[80px] border-b border-gray-50 dark:border-slate-800/50 relative">
+                            <div className="w-[60px] text-right pr-4 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 group-hover:text-blue-400 transition-colors select-none">
                                 {hour}:00
                             </div>
                             <div className="flex-1 relative">
-                                <div className="absolute top-1/2 left-0 right-0 border-t border-dotted border-gray-50 w-full h-0" />
+                                <div className="absolute top-1/2 left-0 right-0 border-t border-dotted border-gray-50 dark:border-slate-800/50 w-full h-0" />
                             </div>
                         </div>
                     ))}
@@ -287,7 +286,7 @@ const DayView = ({ date, events, onEventClick }) => {
 
             {/* --- ZONA TAREAS LATERAL --- */}
             {showTasks && (
-                <div className="w-80 bg-gray-50/80 backdrop-blur-sm flex flex-col border-l border-gray-100 shadow-xl animate-slideInRight z-20 absolute right-0 h-full md:relative md:shadow-none">
+                <div className="w-80 bg-gray-50/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col border-l border-gray-100 dark:border-slate-800 shadow-xl animate-slideInRight z-20 absolute right-0 h-full md:relative md:shadow-none">
                     
                     <div className="p-6 pb-4 flex justify-between items-center">
                         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -301,19 +300,19 @@ const DayView = ({ date, events, onEventClick }) => {
 
                     {/* INPUT RÁPIDO */}
                     <div className="px-4 mb-4">
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-blue-100 transition-all shadow-sm">
+                        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-xl border border-gray-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900 transition-all shadow-sm">
                             <Plus size={16} className="text-gray-400" />
                             <input 
                                 type="text" 
                                 placeholder="Añadir tarea..."
-                                className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
+                                className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-100 placeholder-gray-400"
                                 value={quickTask}
                                 onChange={(e) => setQuickTask(e.target.value)}
                                 onKeyDown={handleAddQuickTask}
                             />
                             <button 
                                 onClick={handleAddQuickTask}
-                                className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-1 rounded-md transition-colors"
+                                className="bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-600 dark:text-blue-400 p-1 rounded-md transition-colors"
                             >
                                 <Plus size={14} />
                             </button>
@@ -333,14 +332,14 @@ const DayView = ({ date, events, onEventClick }) => {
                                 const completedSubs = subtasks.filter(s => s.completed).length;
 
                                 return (
-                                    <div key={task.id} className={`group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all ${isExpanded ? 'ring-1 ring-blue-100' : 'hover:shadow-md'}`}>
+                                    <div key={task.id} className={`group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-all ${isExpanded ? 'ring-1 ring-blue-100 dark:ring-blue-900' : 'hover:shadow-md'}`}>
                                         
                                         {/* CABECERA TAREA */}
                                         <div className="flex items-start p-3 gap-3">
                                             {/* Botón expandir */}
                                             <button 
                                                 onClick={() => toggleExpand(task.id)}
-                                                className={`mt-0.5 text-gray-300 hover:text-blue-500 transition-colors p-0.5 rounded ${isExpanded ? 'text-blue-500 bg-blue-50' : ''}`}
+                                                className={`mt-0.5 text-gray-300 hover:text-blue-500 transition-colors p-0.5 rounded ${isExpanded ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''}`}
                                             >
                                                 {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                                             </button>
@@ -353,7 +352,7 @@ const DayView = ({ date, events, onEventClick }) => {
                                             </button>
                                             
                                             <div className="flex-1 min-w-0">
-                                                <span className="text-sm font-medium text-gray-700 leading-tight block cursor-pointer" onClick={() => toggleExpand(task.id)}>
+                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight block cursor-pointer" onClick={() => toggleExpand(task.id)}>
                                                     {task.title}
                                                 </span>
                                                 {subtasks.length > 0 && !isExpanded && (
@@ -366,17 +365,17 @@ const DayView = ({ date, events, onEventClick }) => {
 
                                         {/* SUBTAREAS DESPLEGABLES */}
                                         {isExpanded && (
-                                            <div className="bg-gray-50/50 border-t border-gray-100 p-3 pl-10 space-y-2">
+                                            <div className="bg-gray-50/50 dark:bg-slate-900/50 border-t border-gray-100 dark:border-slate-700 p-3 pl-10 space-y-2">
                                                 {subtasks.map(sub => (
                                                     <div key={sub.id} className="flex items-center gap-2 group/sub">
                                                         <CornerDownRight size={12} className="text-gray-300" />
                                                         <button 
                                                             onClick={() => toggleSubtask(task.id, sub.id)}
-                                                            className={`w-3 h-3 rounded border flex items-center justify-center transition-all ${sub.completed ? 'bg-blue-400 border-blue-400 text-white' : 'border-gray-300 text-transparent hover:border-blue-400'}`}
+                                                            className={`w-3 h-3 rounded border flex items-center justify-center transition-all ${sub.completed ? 'bg-blue-400 border-blue-400 text-white' : 'border-gray-300 dark:border-slate-600 text-transparent hover:border-blue-400'}`}
                                                         >
                                                             <Check size={8} strokeWidth={4} />
                                                         </button>
-                                                        <span className={`flex-1 text-xs ${sub.completed ? 'text-gray-400 line-through' : 'text-gray-600'}`}>
+                                                        <span className={`flex-1 text-xs ${sub.completed ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-600 dark:text-gray-300'}`}>
                                                             {sub.title}
                                                         </span>
                                                         <button 
@@ -394,7 +393,7 @@ const DayView = ({ date, events, onEventClick }) => {
                                                     <input 
                                                         type="text"
                                                         placeholder="Nuevo paso..."
-                                                        className="flex-1 bg-transparent border-b border-transparent focus:border-blue-200 outline-none text-xs text-gray-600 placeholder-gray-400 py-0.5"
+                                                        className="flex-1 bg-transparent border-b border-transparent focus:border-blue-200 outline-none text-xs text-gray-600 dark:text-gray-300 placeholder-gray-400 py-0.5"
                                                         value={newSubtaskTitle}
                                                         onChange={(e) => setNewSubtaskTitle(e.target.value)}
                                                         onKeyDown={(e) => handleAddSubtask(task.id, e)}

@@ -103,7 +103,18 @@ function App() {
   // 💾 CRUD
   // ==================================================================================
 
-  const openCreateModal = () => { setSelectedEvent(null); setIsModalOpen(true); };
+  const openCreateModal = (slotDate = null) => { 
+      // Si slotDate viene del click en el calendario, usarlo. Si no, usar now.
+      // Default duration: appSettings.defaultDuration
+      setSelectedEvent({
+          start: slotDate ? slotDate : new Date(),
+          // End será start + defaultDuration
+          // Nota: EventModal calcula end si no existe? O lo precalculamos aquí.
+          // Mejor pasar null y que EventModal ponga defaults, PERO EventModal necesita saber la defaultDuration.
+          // Vamos a pasar un objeto "nuevo" con duración precalculada.
+      }); 
+      setIsModalOpen(true); 
+  };
   const openEditModal = (event) => { setSelectedEvent(event); setIsModalOpen(true); };
 
   const handleSaveEvent = async (eventData) => {
@@ -307,6 +318,49 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
+  // Estado para Preferencias Generales
+  const [appSettings, setAppSettings] = useState(() => {
+    const saved = localStorage.getItem('app_settings');
+    return saved ? JSON.parse(saved) : {
+        startOfWeek: 'monday', // 'monday' or 'sunday'
+        defaultDuration: 60, // minutes
+        theme: 'light' // 'light', 'dark', 'auto'
+    };
+  });
+
+  const updateAppSettings = (newSettings) => {
+      const updated = { ...appSettings, ...newSettings };
+      setAppSettings(updated);
+      localStorage.setItem('app_settings', JSON.stringify(updated));
+  };
+
+  // 🌙 SOPORTE MODO OSCURO
+  useEffect(() => {
+     const applyTheme = (theme) => {
+         const root = document.documentElement;
+         if (theme === 'dark') {
+             root.classList.add('dark');
+         } else if (theme === 'light') {
+             root.classList.remove('dark');
+         } else {
+             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                 root.classList.add('dark');
+             } else {
+                 root.classList.remove('dark');
+             }
+         }
+     };
+
+     applyTheme(appSettings.theme);
+
+     if (appSettings.theme === 'auto') {
+         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+         const handleChange = () => applyTheme('auto');
+         mediaQuery.addEventListener('change', handleChange);
+         return () => mediaQuery.removeEventListener('change', handleChange);
+     }
+  }, [appSettings.theme]);
+
   // Onboarding Status
   const [isSyncPromptOpen, setIsSyncPromptOpen] = useState(false);
 
@@ -362,7 +416,7 @@ function App() {
       localStorage.setItem('icloud_config', JSON.stringify(config));
       setICloudConfig(config);
 
-      // Ahora sí, sincronizamos eventos solo de estos calendarios
+      // Ahora sí, sincronizamos eventos y tareas
       await syncEventsFromConfig(config);
   };
 
@@ -383,6 +437,10 @@ function App() {
 
         // 3. Iterar solo calendarios habilitados
         for (const cal of config.enabledCalendars) {
+            // Check VEVENT support
+            const supportsEvents = !cal.supportedComponents || cal.supportedComponents.includes('VEVENT');
+            if (!supportsEvents) continue;
+
             try {
                 const events = await service.getEvents(cal.url, startDate, endDate);
                 // Asignar color si el calendario tiene uno (futuro), o mix.
@@ -630,7 +688,10 @@ function App() {
   };
 
   const renderContent = () => {
-    const commonProps = { events, onEventClick: openEditModal };
+    // Convert 'monday'/'sunday' to 1/0 for date-fns
+    const weekStartsOn = appSettings.startOfWeek === 'monday' ? 1 : 0;
+    const commonProps = { events, onEventClick: openEditModal, startOfWeek: weekStartsOn };
+
     switch(activeTab) {
         case 'day': return <DayView date={currentDate} {...commonProps} />;
         case 'week': return <WeekView date={currentDate} {...commonProps} />;
@@ -655,10 +716,11 @@ function App() {
         
         <SettingsModal 
             isOpen={isSettingsOpen} 
-            onClose={() => setIsSettingsOpen(false)} 
-            onFetchCalendars={fetchICloudCalendars}
-            onConfirmSync={handleConfirmSync}
-            initialConfig={iCloudConfig}
+            onClose={() => setIsSettingsOpen(false)}
+            iCloudConfig={iCloudConfig}
+            onConnect={handleConfirmSync}
+            appSettings={appSettings}
+            onUpdateSettings={updateAppSettings}
         />
 
         {/* ONBOARDING MODAL */}
@@ -680,8 +742,9 @@ function App() {
             onSave={handleSaveEvent} 
             onDelete={requestDelete} 
             defaultDate={currentDate} 
-            eventToEdit={selectedEvent} 
+            event={selectedEvent} 
             calendars={iCloudConfig?.enabledCalendars || []}
+            defaultDuration={appSettings.defaultDuration}
         />
         <ConfirmModal 
             isOpen={isConfirmOpen} 

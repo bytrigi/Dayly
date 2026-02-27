@@ -2,9 +2,9 @@ import React from 'react';
 import { startOfWeek, addDays, format, isSameDay, differenceInMinutes, startOfDay, differenceInCalendarDays, endOfDay, isBefore, isAfter, max, min } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const WeekView = ({ date, events = [], onEventClick }) => {
+const WeekView = ({ date, events = [], onEventClick, startOfWeek: weekStartsOn = 1 }) => {
     const hours = Array.from({ length: 24 }, (_, i) => i);
-    const startDate = startOfWeek(date, { weekStartsOn: 1 });
+    const startDate = startOfWeek(date, { weekStartsOn });
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
     
     // Altura por hora (80px = h-20)
@@ -52,20 +52,20 @@ const WeekView = ({ date, events = [], onEventClick }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-white relative font-sans">
+        <div className="flex flex-col h-full bg-white dark:bg-slate-900 relative font-sans">
             
             {/* CABECERA DE DÍAS */}
-            <div className="flex-none bg-white z-30 shadow-sm relative border-b border-gray-200">
+            <div className="flex-none bg-white dark:bg-slate-900 z-30 shadow-sm relative border-b border-gray-200 dark:border-slate-800">
                 <div className="flex">
-                    <div className="w-14 border-r border-gray-100 bg-gray-50"></div> 
+                    <div className="w-14 border-r border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900"></div> 
                     {weekDays.map((day) => {
                         const isToday = isSameDay(day, new Date());
                         return (
-                            <div key={day.toString()} className={`flex-1 flex flex-col items-center justify-center py-3 border-r border-gray-100 ${isToday ? 'bg-blue-50/20' : ''}`}>
-                                <span className={`text-xs font-bold uppercase tracking-wider ${isToday ? 'text-blue-600' : 'text-gray-400'}`}>
+                            <div key={day.toString()} className={`flex-1 flex flex-col items-center justify-center py-3 border-r border-gray-100 dark:border-slate-800 ${isToday ? 'bg-blue-50/20 dark:bg-blue-900/20' : ''}`}>
+                                <span className={`text-xs font-bold uppercase tracking-wider ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
                                     {format(day, 'EEE', { locale: es })}
                                 </span>
-                                <div className={`w-8 h-8 flex items-center justify-center rounded-full mt-1 text-lg font-serif ${isToday ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700'}`}>
+                                <div className={`w-8 h-8 flex items-center justify-center rounded-full mt-1 text-lg font-serif ${isToday ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-md' : 'text-gray-700 dark:text-gray-200'}`}>
                                     {format(day, 'd')}
                                 </div>
                             </div>
@@ -74,19 +74,19 @@ const WeekView = ({ date, events = [], onEventClick }) => {
                 </div>
                 
 {/* Sección All Day con CSS Grid */}
-                <div className="flex border-t border-gray-100 min-h-[2.5rem] relative">
+                <div className="flex border-t border-gray-100 dark:border-slate-800 min-h-[2.5rem] relative">
                      {/* Label lateral */}
-                     <div className="w-14 border-r border-gray-200 bg-gray-50/50 text-[10px] flex items-center justify-center text-gray-400 font-bold tracking-tighter p-1 text-center leading-tight z-20">
+                     <div className="w-14 border-r border-gray-200 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 text-[10px] flex items-center justify-center text-gray-400 dark:text-gray-500 font-bold tracking-tighter p-1 text-center leading-tight z-20">
                         ALL DAY
                      </div>
                      
                      {/* Contenedor Grid */}
-                     <div className="flex-1 bg-white relative grid grid-cols-7 gap-y-1 auto-rows-min p-1">
+                     <div className="flex-1 bg-white dark:bg-slate-900 relative grid grid-cols-7 gap-y-1 auto-rows-min p-1">
                         
                         {/* 1. Fondo de columnas (Guías visuales) - Absolute para estar detrás */}
                         <div className="absolute inset-0 grid grid-cols-7 pointer-events-none z-0">
                            {weekDays.map((day, i) => (
-                               <div key={i} className={`border-r border-gray-100 h-full ${isSameDay(day, new Date()) ? 'bg-blue-50/10' : ''}`}></div>
+                               <div key={i} className={`border-r border-gray-100 dark:border-slate-800 h-full ${isSameDay(day, new Date()) ? 'bg-blue-50/10 dark:bg-blue-900/10' : ''}`}></div>
                            ))}
                         </div>
 
@@ -151,13 +151,13 @@ const WeekView = ({ date, events = [], onEventClick }) => {
             </div>
 
             {/* GRID SCROLLABLE */}
-            <div className="flex-1 overflow-y-auto relative no-scrollbar bg-white">
+            <div className="flex-1 overflow-y-auto relative no-scrollbar bg-white dark:bg-slate-900">
                 <div className="flex relative min-h-full">
                     
                     {/* COLUMNA HORAS (Izquierda) */}
-                    <div className="w-14 flex-shrink-0 border-r border-gray-200 bg-gray-50/50 sticky left-0 z-20">
+                    <div className="w-14 flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 sticky left-0 z-20">
                         {hours.map(h => (
-                            <div key={h} className="h-20 text-right pr-2 pt-1 text-xs text-gray-400 font-mono border-b border-transparent relative">
+                            <div key={h} className="h-20 text-right pr-2 pt-1 text-xs text-gray-400 dark:text-gray-600 font-mono border-b border-transparent relative">
                                 <span className="-top-2 relative">{h}:00</span>
                             </div>
                         ))}
@@ -167,7 +167,7 @@ const WeekView = ({ date, events = [], onEventClick }) => {
                     <div className="flex-1 flex relative">
                         {/* Líneas de horas (Fondo) */}
                         <div className="absolute inset-0 flex flex-col pointer-events-none z-0">
-                            {hours.map(h => <div key={h} className="h-20 border-b border-dashed border-gray-100 w-full"></div>)}
+                            {hours.map(h => <div key={h} className="h-20 border-b border-dashed border-gray-100 dark:border-slate-800/50 w-full"></div>)}
                         </div>
 
                         {/* Columnas verticales */}
@@ -186,7 +186,7 @@ const WeekView = ({ date, events = [], onEventClick }) => {
                             });
 
                             return (
-                                <div key={i} className={`flex-1 border-r border-gray-100 relative z-10 ${isSameDay(day, new Date()) ? 'bg-blue-50/5' : ''}`}>
+                                <div key={i} className={`flex-1 border-r border-gray-100 dark:border-slate-800 relative z-10 ${isSameDay(day, new Date()) ? 'bg-blue-50/5 dark:bg-blue-900/10' : ''}`}>
                                     
                                     {/* RENDERIZAR EVENTOS DEL DÍA */}
                                     {dayEvents.map(event => {

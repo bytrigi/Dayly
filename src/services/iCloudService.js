@@ -156,6 +156,7 @@ export class ICloudService {
           <d:displayname />
           <d:resourcetype />
           <cs:getctag />
+          <c:supported-calendar-component-set />
         </d:prop>
       </d:propfind>
     `;
@@ -164,6 +165,9 @@ export class ICloudService {
     const calendarsXml = await this.request('PROPFIND', fullHomeUrl, calendarsBody, { 'Depth': '1' });
     const calendarsParsed = this.parser.parse(calendarsXml);
     
+    // DEBUG RESPUESTA
+    console.log('[iCloudService] Calendars XML Parsed:', JSON.stringify(calendarsParsed, null, 2));
+
     const calendars = [];
     let responses = calendarsParsed.multistatus.response || [];
     if (!Array.isArray(responses)) responses = [responses];
@@ -171,9 +175,16 @@ export class ICloudService {
     for (const resp of responses) {
         try {
             const propstats = Array.isArray(resp.propstat) ? resp.propstat : [resp.propstat];
-            // Buscamos el propstat con status 200 OK, pero generalmente el primero tiene los props
-            const props = propstats[0].prop;
             
+            // BUSCAR EL PROPSTAT CON STATUS 200 OK
+            const okPropstat = propstats.find(p => p.status && p.status.includes('200'));
+            
+            if (!okPropstat) {
+                // Si no hay bloque 200, saltamos este recurso (probablemente error de acceso)
+                continue;
+            }
+
+            const props = okPropstat.prop;
             const resourceType = props.resourcetype;
             
             // force array check or existance check
@@ -182,13 +193,23 @@ export class ICloudService {
                 const displayName = this._getText(props.displayname) || 'Calendario Sin Nombre';
                 const ctag = this._getText(props.getctag) || '';
                 
+                // Detectar tipos soportados (VEVENT, VTODO)
+                let supportedComponents = ['VEVENT', 'VTODO']; // Asumir ambos por defecto si no viene info
+                const supportedSet = props['supported-calendar-component-set'];
+                if (supportedSet && supportedSet.comp) {
+                     const comps = Array.isArray(supportedSet.comp) ? supportedSet.comp : [supportedSet.comp];
+                     supportedComponents = comps.map(c => c.name || c._name); 
+                }
+
+                // FILTRO: Solo queremos Calendarios (VEVENT). Ignoramos listas de Tareas (VTODO only)
+                // porque iCloud Reminders modernizado no funciona bien por CalDAV.
+                if (!supportedComponents.includes('VEVENT')) {
+                    continue; 
+                }
+
                 // Algunos href son relativos, otros absolutos. Chequear.
                 let calendarUrl = href;
                 if (!href.startsWith('http')) {
-                    // Si es relativo, hay que tener cuidado. A veces es relativo al root, a veces al home.
-                    // Generalmente iCloud devuelve paths absolutos desde el root (ej: /123/calendars/work/)
-                    // Si empieza por /, usamos baseUrl. Si no, quizá haya que componer con fullHomeUrl.
-                    // Pero para iCloud suele ser safe usar baseUrl + href si href empieza por /
                     calendarUrl = `${this.baseUrl}${href}`;
                 }
 
@@ -196,11 +217,12 @@ export class ICloudService {
                     name: displayName,
                     url: calendarUrl,
                     ctag,
-                    source: 'icloud'
+                    source: 'icloud',
+                    supportedComponents
                 });
             }
         } catch (e) {
-            // Ignorar
+            console.warn("Error parsing individual calendar:", e);
         }
     }
     
@@ -309,13 +331,19 @@ export class ICloudService {
                 let recurrenceEnd = null;
                 
                 if (event.component && event.component.hasProperty('rrule')) {
-                    const rrule = event.component.getFirstProperty('rrule').getValue();
-                    // rrule es un objeto ICAL.Recur
-                    if (rrule && rrule.freq) {
-                        recurrence = rrule.freq.toString(); // "WEEKLY", "DAILY", etc.
-                        if (rrule.until) {
-                            recurrenceEnd = rrule.until.toJSDate().toISOString();
+                    const rruleProp = event.component.getFirstProperty('rrule');
+                    if (rruleProp && typeof rruleProp.getValue === 'function') {
+                        const rrule = rruleProp.getValue();
+                        // rrule es un objeto ICAL.Recur
+                        if (rrule && rrule.freq) {
+                            recurrence = rrule.freq.toString(); // "WEEKLY", "DAILY", etc.
+                            if (rrule.until) {
+                                recurrenceEnd = rrule.until.toJSDate().toISOString();
+                            }
                         }
+                    } else {
+                         // Fallback or explicit handling if ical.js behaves unexpectedly
+                         // Sometimes rruleProp is directly the value? No, unlikely.
                     }
                 }
 
@@ -632,6 +660,142 @@ END:VCALENDAR`;
       await this.request('PUT', eventUrl, icsData, {
           'Content-Type': 'text/calendar; charset=utf-8'
       });
+  }
+
+  // 9. Obtener Tareas (VTODO)
+  async getTasks(calendarUrl) {
+    // Para simplificar, traemos todas las tareas pendientes y las completadas recientemente?
+    // O traemos TODO y filtramos en cliente (VTODO no suele ser tan masivo como VEVENT historial, pero ojo)
+    // Probemos trayendo TODO VTODO.
+    
+    const reportBody = `
+      <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+        <d:prop>
+          <d:getetag />
+          <c:calendar-data />
+        </d:prop>
+        <c:filter>
+          <c:comp-filter name="VCALENDAR">
+            <c:comp-filter name="VTODO" />
+          </c:comp-filter>
+        </c:filter>
+      </c:calendar-query>
+    `;
+
+    const reportXml = await this.request('REPORT', calendarUrl, reportBody);
+    const parsed = this.parser.parse(reportXml);
+    
+    const tasks = [];
+    let responses = parsed.multistatus && parsed.multistatus.response;
+    if (!responses) return [];
+    if (!Array.isArray(responses)) responses = [responses];
+
+    for (const resp of responses) {
+        try {
+            const propstats = Array.isArray(resp.propstat) ? resp.propstat : [resp.propstat];
+            const props = propstats[0].prop;
+            const calendarData = this._getText(props['calendar-data']); 
+            
+            if (!calendarData) continue;
+
+            const jcal = ICAL.parse(calendarData);
+            const comp = new ICAL.Component(jcal);
+            const vtodos = comp.getAllSubcomponents('vtodo');
+
+            for (const vtodo of vtodos) {
+                const task = new ICAL.Event(vtodo); // ICAL.Event wrapper funciona tb para VTODO en propiedades básicas
+                
+                // Extraer propiedades específicas de VTODO
+                const uid = task.uid;
+                const summary = task.summary || 'Sin Título';
+                const status = vtodo.getFirstPropertyValue('status') || 'NEEDS-ACTION';
+                const completed = status === 'COMPLETED';
+                const priority = vtodo.getFirstPropertyValue('priority') || 0;
+                
+                // Fecha Due (Vencimiento)
+                let due = null;
+                const dtDue = vtodo.getFirstProperty('due');
+                if (dtDue) {
+                    due = dtDue.getValue().toJSDate().toISOString();
+                }
+
+                tasks.push({
+                    id: uid,
+                    title: summary,
+                    completed: completed,
+                    createdAt: new Date().toISOString(), // Fallback
+                    dueDate: due,
+                    priority: priority,
+                    source: 'icloud',
+                    calendarUrl: calendarUrl
+                });
+            }
+
+        } catch (e) {
+            console.warn("Error parsing task", e);
+        }
+    }
+
+    return tasks;
+  }
+
+  // 10. Crear Tarea (VTODO)
+  async createTask(calendarUrl, taskData) {
+      const uid = taskData.id || crypto.randomUUID();
+      const nowStr = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      
+      const vcalendar = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PlannerApp//v1.0//EN
+BEGIN:VTODO
+UID:${uid}
+DTSTAMP:${nowStr}
+SUMMARY:${(taskData.title || 'Nueva Tarea').replace(/\r?\n/g, '\\n')}
+STATUS:${taskData.completed ? 'COMPLETED' : 'NEEDS-ACTION'}
+${taskData.dueDate ? `DUE:${new Date(taskData.dueDate).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}` : ''}
+END:VTODO
+END:VCALENDAR`;
+
+      const eventUrl = `${calendarUrl.replace(/\/$/, '')}/${uid}.ics`;
+      console.log('[iCloudService] Creating Task at:', eventUrl);
+      
+      await this.request('PUT', eventUrl, vcalendar, {
+        'Content-Type': 'text/calendar; charset=utf-8',
+        'If-None-Match': '*' 
+      });
+      return { ...taskData, id: uid };
+  }
+
+  // 11. Actualizar Tarea (VTODO)
+  async updateTask(calendarUrl, taskData) {
+      if (!taskData.id) throw new Error("ID requerido para actualizar tarea");
+      const uid = taskData.id;
+      const nowStr = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+      const vcalendar = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PlannerApp//v1.0//EN
+BEGIN:VTODO
+UID:${uid}
+DTSTAMP:${nowStr}
+SUMMARY:${(taskData.title || 'Tarea').replace(/\r?\n/g, '\\n')}
+STATUS:${taskData.completed ? 'COMPLETED' : 'NEEDS-ACTION'}
+${taskData.dueDate ? `DUE:${new Date(taskData.dueDate).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}` : ''}
+END:VTODO
+END:VCALENDAR`;
+
+      const eventUrl = `${calendarUrl.replace(/\/$/, '')}/${uid}.ics`;
+      console.log('[iCloudService] Updating Task at:', eventUrl);
+      
+      await this.request('PUT', eventUrl, vcalendar, {
+        'Content-Type': 'text/calendar; charset=utf-8'
+      });
+      return taskData;
+  }
+
+  // 12. Borrar Tarea (Igual que evento)
+  async deleteTask(calendarUrl, taskId) {
+      return this.deleteEvent(calendarUrl, taskId);
   }
 }
 

@@ -33,27 +33,27 @@ const CustomSelect = ({ value, options, onChange, icon: Icon, align = 'left', co
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
-                    w-full flex items-center justify-between bg-white border border-gray-200 
-                    transition-all hover:border-blue-300 focus:ring-2 focus:ring-blue-50/50 outline-none
-                    ${isOpen ? 'border-blue-400 ring-2 ring-blue-50/50' : ''}
+                    w-full flex items-center justify-between bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 
+                    transition-all hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-50/50 dark:focus:ring-blue-900/50 outline-none
+                    ${isOpen ? 'border-blue-400 dark:border-blue-500 ring-2 ring-blue-50/50 dark:ring-blue-900/50' : ''}
                     ${compact ? 'rounded-md py-1 px-2 text-xs' : 'rounded-xl p-2.5 text-sm'}
                 `}
             >
                 <div className="flex items-center gap-2 overflow-hidden">
-                    {Icon && <Icon size={compact ? 14 : 16} className="text-gray-400 flex-shrink-0" />}
-                    <span className={`font-medium text-gray-700 truncate ${compact ? 'text-xs' : 'text-sm'}`}>
+                    {Icon && <Icon size={compact ? 14 : 16} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />}
+                    <span className={`font-medium text-gray-700 dark:text-gray-200 truncate ${compact ? 'text-xs' : 'text-sm'}`}>
                         {compact ? value.toString().padStart(2, '0') : selectedLabel}
                     </span>
                 </div>
-                <ChevronDown size={compact ? 12 : 14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={compact ? 12 : 14} className={`text-gray-400 dark:text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* MENÚ DESPLEGABLE */}
             {isOpen && (
                 <div 
                     className={`
-                        absolute z-[60] bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] 
-                        overflow-hidden border border-gray-50 animate-fadeIn
+                        absolute z-[60] bg-white dark:bg-slate-800 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] 
+                        overflow-hidden border border-gray-50 dark:border-slate-700 animate-fadeIn
                         ${align === 'right' ? 'right-0' : 'left-0'}
                         ${direction === 'up' ? 'bottom-full mb-1' : 'top-full mt-2'} 
                     `}
@@ -72,7 +72,7 @@ const CustomSelect = ({ value, options, onChange, icon: Icon, align = 'left', co
                                 className={`
                                     w-full text-left flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors
                                     ${compact ? 'text-xs' : 'text-sm'}
-                                    ${value == opt.value ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                                    ${value == opt.value ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-gray-100'}
                                 `}
                             >
                                 <span>{opt.label}</span>
@@ -86,7 +86,7 @@ const CustomSelect = ({ value, options, onChange, icon: Icon, align = 'left', co
     );
 };
 
-const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdit, calendars }) => {
+const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdit, calendars, defaultDuration = 60 }) => {
   const [title, setTitle] = useState('');
   const [start, setStart] = useState(new Date());
   const [end, setEnd] = useState(new Date());
@@ -148,7 +148,7 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
         // Ajustar a la siguiente hora en punto para mejor UX
         startD.setHours(startD.getHours() + 1, 0, 0, 0); 
         const endD = new Date(startD);
-        endD.setHours(endD.getHours() + 1);
+        endD.setMinutes(endD.getMinutes() + defaultDuration);
         
         setStart(startD);
         setEnd(endD);
@@ -240,33 +240,33 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
   // Input del DatePicker
   const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
     <button 
-        className="flex-1 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs p-2 flex items-center justify-between hover:border-blue-400 transition-all focus:ring-2 focus:ring-blue-50/50 outline-none w-full group shadow-sm" 
+        className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-700 dark:text-gray-200 text-xs p-2 flex items-center justify-between hover:border-blue-400 dark:hover:border-blue-500 transition-all focus:ring-2 focus:ring-blue-50/50 dark:focus:ring-blue-900/50 outline-none w-full group shadow-sm" 
         onClick={onClick} 
         ref={ref}
         type="button"
     >
-      <span className="font-semibold text-gray-600 group-hover:text-gray-800 transition-colors">{value}</span>
-      <CalendarIcon size={14} className="text-gray-400 group-hover:text-blue-500 transition-colors ml-2" />
+      <span className="font-semibold text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-gray-100 transition-colors">{value}</span>
+      <CalendarIcon size={14} className="text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors ml-2" />
     </button>
   ));
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 backdrop-blur-[2px] animate-fadeIn" style={{ WebkitAppRegion: 'no-drag' }}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 dark:bg-black/40 backdrop-blur-[2px] animate-fadeIn" style={{ WebkitAppRegion: 'no-drag' }}>
       
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100 animate-popIn flex flex-col max-h-[85vh]">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100 animate-popIn flex flex-col max-h-[85vh] ring-1 ring-black/5 dark:ring-white/10">
         
         {/* HEADER */}
-        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100 flex-shrink-0 bg-white z-20">
-          <h2 className="text-lg font-serif font-bold text-gray-800">
+        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900 z-20">
+          <h2 className="text-lg font-serif font-bold text-gray-800 dark:text-gray-100">
             {eventToEdit ? 'Editar' : 'Nuevo Evento'}
           </h2>
           <div className="flex gap-2">
             {eventToEdit && (
-              <button onClick={onDelete} className="p-1.5 text-red-400 hover:bg-red-50 rounded-full transition">
+              <button onClick={onDelete} className="p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-full transition">
                 <Trash2 size={16} />
               </button>
             )}
-            <button onClick={onClose} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-full transition">
+            <button onClick={onClose} className="p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition">
               <X size={18} />
             </button>
           </div>
@@ -279,7 +279,7 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
             <input 
               type="text" 
               placeholder="Añadir título" 
-              className="w-full text-xl font-bold text-gray-800 placeholder-gray-300 border-none outline-none bg-transparent focus:ring-0"
+              className="w-full text-xl font-bold text-gray-800 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600 border-none outline-none bg-transparent focus:ring-0"
               value={title}
               onChange={e => setTitle(e.target.value)}
               autoFocus
@@ -287,23 +287,23 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                 <Clock size={16} />
                 <span className="text-xs font-medium">Todo el día</span>
             </div>
             <button 
                 onClick={() => setAllDay(!allDay)}
-                className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-300 ${allDay ? 'bg-blue-500' : 'bg-gray-200'}`}
+                className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-300 ${allDay ? 'bg-blue-500' : 'bg-gray-200 dark:bg-slate-700'}`}
             >
                 <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${allDay ? 'translate-x-4' : 'translate-x-0'}`} />
             </button>
           </div>
 
-          <div className="space-y-3 bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+          <div className="space-y-3 bg-gray-50/50 dark:bg-slate-800/50 p-3 rounded-xl border border-gray-100 dark:border-slate-800">
              
              {/* INICIO */}
              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-bold text-gray-400 w-8 uppercase tracking-wider">De</span>
+                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 w-8 uppercase tracking-wider">De</span>
                 <div className="flex-1">
                     <DatePicker 
                         selected={start} 
@@ -325,7 +325,7 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
 
              {/* FIN */}
              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-bold text-gray-400 w-8 uppercase tracking-wider">A</span>
+                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 w-8 uppercase tracking-wider">A</span>
                 <div className="flex-1">
                     <DatePicker 
                         selected={end} 
@@ -383,14 +383,14 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
                         placeholderText="Nunca (Infinito)"
                         isClearable
                         customInput={
-                            <button className="w-full bg-white border border-gray-200 rounded-xl p-2.5 text-sm flex items-center justify-between hover:border-blue-300 focus:ring-2 focus:ring-blue-50/50 outline-none h-[42px]">
-                                <span className={`font-medium truncate ${recurrenceEnd ? 'text-gray-700' : 'text-gray-400'}`}>
+                            <button className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-2.5 text-sm flex items-center justify-between hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-50/50 dark:focus:ring-blue-900/50 outline-none h-[42px]">
+                                <span className={`font-medium truncate ${recurrenceEnd ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}`}>
                                     {recurrenceEnd ? `Hasta ${recurrenceEnd.toLocaleDateString()}` : 'Nunca'}
                                 </span>
                                 {recurrenceEnd ? (
-                                    <X size={14} className="text-gray-400 hover:text-red-500" onClick={(e) => { e.stopPropagation(); setRecurrenceEnd(null); }} />
+                                    <X size={14} className="text-gray-400 dark:text-gray-500 hover:text-red-500" onClick={(e) => { e.stopPropagation(); setRecurrenceEnd(null); }} />
                                 ) : (
-                                    <ChevronDown size={14} className="text-gray-400" />
+                                    <ChevronDown size={14} className="text-gray-400 dark:text-gray-500" />
                                 )}
                             </button>
                         }
@@ -436,9 +436,9 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
                         onClick={() => colorInputRef.current?.click()}
                         className={`
                             w-5 h-5 rounded-full transition-all flex-shrink-0 
-                            hover:scale-110 hover:shadow-sm cursor-pointer border border-gray-200
-                            flex items-center justify-center bg-white text-gray-400
-                            ${!colors.includes(color) ? 'ring-2 ring-offset-1 ring-gray-300 shadow-sm scale-110' : ''}
+                            hover:scale-110 hover:shadow-sm cursor-pointer border border-gray-200 dark:border-slate-700
+                            flex items-center justify-center bg-white dark:bg-slate-800 text-gray-400 dark:text-gray-500
+                            ${!colors.includes(color) ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-slate-900 ring-gray-300 dark:ring-slate-600 shadow-sm scale-110' : ''}
                         `}
                         title="Color personalizado"
                         style={!colors.includes(color) ? { backgroundColor: color } : {}}
@@ -456,11 +456,11 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
             </div>
           </div>
 
-          <div className="flex items-start gap-3 border-t border-gray-100 pt-3">
-             <AlignLeft size={16} className="text-gray-300 mt-1" />
+          <div className="flex items-start gap-3 border-t border-gray-100 dark:border-slate-800 pt-3">
+             <AlignLeft size={16} className="text-gray-300 dark:text-gray-600 mt-1" />
              <textarea 
                 placeholder="Notas..."
-                className="flex-1 bg-transparent border-none outline-none text-xs text-gray-600 placeholder-gray-300 resize-none h-16 leading-relaxed focus:ring-0"
+                className="flex-1 bg-transparent border-none outline-none text-xs text-gray-600 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 resize-none h-16 leading-relaxed focus:ring-0"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
              />
@@ -468,7 +468,7 @@ const EventModal = ({ isOpen, onClose, onSave, onDelete, defaultDate, eventToEdi
           
         </div>
 
-        <div className="px-5 py-4 border-t border-gray-100 flex justify-end flex-shrink-0 bg-white z-20">
+        <div className="px-5 py-4 border-t border-gray-100 dark:border-slate-800 flex justify-end flex-shrink-0 bg-white dark:bg-slate-900 z-20">
             <button 
                 onClick={handleSave}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg shadow-blue-600/30 transition-transform active:scale-95 w-full md:w-auto"
