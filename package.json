@@ -56,13 +56,22 @@
     "appId": "com.ioscalendar.windows",
     "productName": "iOS Calendar for Windows",
     "copyright": "Copyright © 2026 Adrián",
+    "compression": "normal",
     "mac": {
        "target": ["default"]
     },
     "win": {
       "target": ["nsis"],
       "icon": "build/icon.ico",
-      "artifactName": "iOS-Calendar-for-Windows_Installer.exe"
+      "artifactName": "iOS-Calendar-for-Windows_Installer.exe",
+      "publisherName": "Adrián Trigo Cadaveira"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true
     },
     "directories": {
       "output": "release"
