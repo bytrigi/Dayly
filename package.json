@@ -1,5 +1,5 @@
 {
-  "name": "ios-calendar-for-windows",
+  "name": "dayly",
   "private": true,
   "author": {
     "name": "Adrián"
@@ -53,8 +53,8 @@
   },
   "main": "dist-electron/main.js",
   "build": {
-    "appId": "com.ioscalendar.windows",
-    "productName": "iOS Calendar for Windows",
+    "appId": "com.dayly.app",
+    "productName": "Dayly",
     "copyright": "Copyright © 2026 Adrián",
     "compression": "normal",
     "mac": {
@@ -63,7 +63,7 @@
     "win": {
       "target": ["nsis"],
       "icon": "build/icon.ico",
-      "artifactName": "iOS-Calendar-for-Windows_Installer.exe",
+      "artifactName": "Dayly_Installer.exe",
       "publisherName": "Adrián Trigo Cadaveira"
     },
     "nsis": {

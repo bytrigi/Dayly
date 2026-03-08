@@ -1,4 +1,4 @@
-# 📅 iOS Calendar for Windows
+# 📅 Dayly
 
 Una aplicación de escritorio moderna que trae la experiencia estética y funcional del calendario de iOS a Windows. Construida con tecnologías web de vanguardia, esta agenda ofrece un sistema completo para gestionar **eventos, tareas y notas**, con soporte nativo para **sincronización bidireccional con iCloud**.
 

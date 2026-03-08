@@ -1,9 +1,9 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  appId: "com.ioscalendar.windows",
+  appId: "com.dayly.app",
   asar: true,
-  productName: "iOS Calendar for Windows",
+  productName: "Dayly",
   copyright: "Copyright © 2026 Adrián",
   directories: {
     output: "release/${version}",
@@ -20,7 +20,7 @@
         arch: ["x64"],
       },
     ],
-    artifactName: "iOS-Calendar-for-Windows_Installer.exe",
+    artifactName: "Dayly_Installer.exe",
   },
   nsis: {
     oneClick: false,

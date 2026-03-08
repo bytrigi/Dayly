@@ -21,7 +21,7 @@ let win: BrowserWindow | null
 app.disableHardwareAcceleration() 
 
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.ioscalendar.windows')
+  app.setAppUserModelId('com.dayly.app')
 }
 
 function createWindow() {

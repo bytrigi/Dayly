@@ -864,7 +864,7 @@ function App() {
             isOpen={isSyncPromptOpen} 
             onClose={handleOnboardingCancel} 
             onConfirm={handleOnboardingConfirm} 
-            title="Bienvenido a iOS Calendar for Windows!" 
+            title="¡Bienvenido a Dayly!" 
             message="¿Deseas vincular tu cuenta de iCloud para sincronizar tu calendario de Apple?"
             confirmText="¡Sí!"
             cancelText="Quizá más tarde"
